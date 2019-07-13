@@ -7,6 +7,10 @@ var setReflectionAxis = document.getElementById('reflection');
 var selector = document.getElementById('choice');
 var btnAddShape = document.getElementById('add');
 btnAddShape.addEventListener('click', addShape);
+var btnCopy = document.getElementById('copy');
+btnCopy.addEventListener('click', copy);
+var btnDelete = document.getElementById('delete');
+btnDelete.addEventListener('click', deleteObject);
 
 var bkgColorPicker = document.getElementById('bkgColor');
 bkgColorPicker.addEventListener('change', changeBkgColor);
@@ -47,11 +51,47 @@ function addShape(){
 
 
 function selectFromList(){
-	on = document.getElementsByClassName('on');
-	on[0].setAttribute('class', 'off');
+	if(selectedObject >= 0){
+		on = document.getElementsByClassName('on');
+		on[0].setAttribute('class', 'off');
+	}
 	this.setAttribute('class', 'on');
 	selectedObject = this.getAttribute('id');
 	objects[selectedObject].putInputs();
+}
+
+
+function copy(){
+	if(selectedObject >= 0){
+		// Copy of the instance
+		objects.push(Object.assign( Object.create( Object.getPrototypeOf(objects[selectedObject])), objects[selectedObject]));
+		on = document.getElementsByClassName('on');
+		p = document.createElement('p');
+		p.setAttribute('id', objects.length-1);
+		p.innerHTML = on[0].innerHTML.split(';')[0] + '; ID=' + objects.length;
+		on[0].setAttribute('class', 'off');
+		p.setAttribute('class', 'on')
+		selectedObject = objects.length-1;
+		objList.appendChild(p);
+		objects[selectedObject].putInputs();
+		p.addEventListener('click', selectFromList);
+	}
+}
+
+
+function deleteObject(){
+	if(selectedObject >= 0){
+		on = document.getElementsByClassName('on');
+		on[0].remove();
+		objects.splice(selectedObject, 1);
+		// Change idx
+		for(var i = parseInt(selectedObject)+1; i <= objects.length; i++){
+			p = document.getElementById(i);
+			p.setAttribute('id', i-1);
+			p.innerHTML = p.innerHTML.split(';')[0] + '; ID=' + i;
+		}
+		selectedObject = -1;
+	}
 }
 
 
