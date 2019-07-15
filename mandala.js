@@ -146,6 +146,7 @@ function partial(){
 	// Checkboxes
 	this.closeSegment = false;
 	this.displayReflection = false;
+	this.connectReflectionToReal = false;
 	this.guideLines = false;
 	this.fill = false;
 	// Color
@@ -184,60 +185,66 @@ function partial(){
 			}
 			stroke(this.strokeColor);
 			// Chosen part
-			beginShape();
-			for(var i = this.start; i < this.stop; i+=4){
-				x = cos(i) * this.rx;
-				y = sin(i) * this.ry;
+			if(this.stop - this.start < 360){
+				beginShape();
+				for(var i = this.stop; i > this.start; i-=4){
+					x = cos(i) * this.rx;
+					y = sin(i) * this.ry;
+					vertex(x, y);
+				}
+				x = cos(this.start) * this.rx;
+				y = sin(this.start) * this.ry;
 				vertex(x, y);
-			}
-			x = cos(this.stop) * this.rx;
-			y = sin(this.stop) * this.ry;
-			vertex(x, y);
-			if(this.closeSegment){
-				endShape(CLOSE);
+				if(this.closeSegment && !this.connectReflectionToReal){
+					endShape(CLOSE);
+				}else if(!this.reflection){
+					endShape();
+				}
 			}else{
-				endShape();
+				ellipse(0, 0, this.rx*2, this.ry*2);
 			}
-			// RESET
-			resetMatrix();
-			// Translation (0,0) == canvas center
-			translate(width/2, height/2);
-			rotate(this.displace+rep);
 			//_______________________
 			// Toggle reflection
 			//_______________________
 			if(this.displayReflection){
 				var alpha = 90 - this.reflectionAngle;
 				var realToReflectionDistance = (this.distance * cos(alpha)) *2;
-				// line from the original center to reflection center
-				//line(this.distance,0,realToReflectionDistance*cos(PI-alpha)+this.distance, realToReflectionDistance*sin(PI-alpha));
-				
-				// Translation (0,0) == reflection center 
-				translate(realToReflectionDistance*cos(180-alpha)+this.distance, realToReflectionDistance*sin(180-alpha));
-				// Rotation around reflection center
-				rotate(2*this.reflectionAngle-this.rotation);
+				// angle of reflection
+				aInc = (2*this.reflectionAngle-(2*this.rotation));
+				// reflection center
+				xInc = realToReflectionDistance*cos(180-alpha);
+				yInc = realToReflectionDistance*sin(180-alpha);
 				
 				// Chosen part
-				beginShape();
-				for(var i = -this.start; i > -this.stop; i-=4){
-					x = cos(i) * this.rx;
-					y = sin(i) * this.ry;
-					vertex(x, y);
-				}
-				x = cos(-this.stop) * this.rx;
-				y = sin(-this.stop) * this.ry;
-				vertex(x, y);
-				if(this.closeSegment){
-				endShape(CLOSE);
+				if(this.stop - this.start < 360){
+					if(!this.connectReflectionToReal){
+						beginShape();
+					}
+					// point rotation = (x*cos(U) - ysin(U); y*cos(U) + x*sin(U))
+					for(var i = -this.start; i > -this.stop; i-=4){
+						x = cos(i) * this.rx+xInc;
+						y = sin(i) * this.ry+yInc;
+						vertex(x*cos(aInc) - y*sin(aInc), y*cos(aInc) + x*sin(aInc));
+					}
+					x = cos(-this.stop) * this.rx+xInc;
+					y = sin(-this.stop) * this.ry+yInc;
+					vertex(x*cos(aInc) - y*sin(aInc), y*cos(aInc) + x*sin(aInc));
+					if(this.closeSegment){
+						endShape(CLOSE);
+					}else{
+						endShape();
+					}
 				}else{
-					endShape();
-				}	
-				// RESET
-				resetMatrix();
-				// Translation (0,0) = canvas center
-				translate(width/2, height/2);
-				rotate(this.displace+rep);
-			}
+					translate(xInc, yInc);
+					rotate(aInc);
+					ellipse(0, 0, this.rx*2, this.ry*2);
+				}
+			}	
+			// RESET
+			resetMatrix();
+			// Translation (0,0) = canvas center
+			translate(width/2, height/2);
+			rotate(this.displace+rep);
 		}
 	}
 	
