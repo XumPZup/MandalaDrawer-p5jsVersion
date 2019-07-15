@@ -127,8 +127,6 @@ function moveObject(){
 	}
 }
 
-
-
 function hexToRgb(c){
 	red = parseInt(c[1] + c[2], 16);
 	green = parseInt(c[3] + c[4], 16);		
@@ -246,8 +244,8 @@ function partial(){
 				// angle of reflection
 				aInc = (2*this.reflectionAngle-(2*this.rotation));
 				// reflection center
-				xInc = realToReflectionDistance*cos(180-alpha);
-				yInc = realToReflectionDistance*sin(180-alpha);
+				xInc = realToReflectionDistance*cos(180-alpha-this.rotation);
+				yInc = realToReflectionDistance*sin(180-alpha-this.rotation);
 				// Chosen part
 				if(this.stop - this.start < 360){
 					if(!this.connectReflectionToReal){
@@ -334,12 +332,16 @@ function RegularPolygon(){
 	// Checkboxes
 	this.closeSegment = true;
 	this.displayReflection = false;
+	this.connectReflectionToReal = false;
 	this.fill = false;
 	// Color
 	this.fillColor = mainColor;
 	this.strokeColor = mainColor;
 	// Functions
 	this.display = function(){
+		if(this.sideNumber <= 0){
+			return;
+		}
 		resetMatrix();
 		// Translation (0,0) == canvas center
 		translate(width/2, height/2);
@@ -365,48 +367,41 @@ function RegularPolygon(){
 				y = sin(i) * this.sideLenght;
 				vertex(x, y);
 			}
-			if(this.closeSegment){
+			if(this.closeSegment && !this.connectReflectionToReal){
 				endShape(CLOSE);
-			}else{
+			}else if(!this.reflection){
 				endShape();
 			}
-			// RESET
-			resetMatrix();
-			// Translation (0,0) == canvas center
-			translate(width/2, height/2);
-			rotate(this.displace+rep);
 			//_______________________
 			// Toggle reflection
 			//_______________________
 			if(this.displayReflection){
 				var alpha = 90 - this.reflectionAngle;
 				var realToReflectionDistance = (this.distance * cos(alpha)) *2;
-				// line from the original center to reflection center
-				//line(this.distance,0,realToReflectionDistance*cos(PI-alpha)+this.distance, realToReflectionDistance*sin(PI-alpha));
-				
-				// Translation (0,0) == reflection center 
-				translate(realToReflectionDistance*cos(180-alpha)+this.distance, realToReflectionDistance*sin(180-alpha));
-				// Rotation around reflection center
-				rotate(2*this.reflectionAngle-this.rotation);
-				
-				// Chosen part
-				beginShape();
-				for(var i = 0; i > -360; i-=360/this.sideNumber){
+				// angle of reflection
+				aInc = (2*this.reflectionAngle-(2*this.rotation));
+				// reflection center
+				xInc = realToReflectionDistance*cos(180-alpha-this.rotation);
+				yInc = realToReflectionDistance*sin(180-alpha-this.rotation);
+				if(!this.connectReflectionToReal){
+					beginShape();
+				}
+				for(var i = -360+360/this.sideNumber; i < 360/this.sideNumber; i+=360/this.sideNumber){
 					x = cos(i) * this.sideLenght;
 					y = sin(i) * this.sideLenght;
-					vertex(x, y);
+					vertex(x*cos(aInc) - y*sin(aInc)+xInc, y*cos(aInc) + x*sin(aInc)+yInc);
 				}
 				if(this.closeSegment){
 				endShape(CLOSE);
 				}else{
 					endShape();
-				}	
-				// RESET
-				resetMatrix();
-				// Translation (0,0) = canvas center
-				translate(width/2, height/2);
-				rotate(this.displace+rep);
-			}
+				}
+			}				
+			// RESET
+			resetMatrix();
+			// Translation (0,0) = canvas center
+			translate(width/2, height/2);
+			rotate(this.displace+rep);	
 		}
 	}
 	
@@ -445,7 +440,6 @@ function RegularPolygon(){
 		menu.appendChild(subMenu);
 	}
 }
-
 //
 //
 //
