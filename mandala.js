@@ -214,7 +214,6 @@ function partial(){
 				// reflection center
 				xInc = realToReflectionDistance*cos(180-alpha);
 				yInc = realToReflectionDistance*sin(180-alpha);
-				
 				// Chosen part
 				if(this.stop - this.start < 360){
 					if(!this.connectReflectionToReal){
@@ -222,13 +221,13 @@ function partial(){
 					}
 					// point rotation = (x*cos(U) - ysin(U); y*cos(U) + x*sin(U))
 					for(var i = -this.start; i > -this.stop; i-=4){
-						x = cos(i) * this.rx+xInc;
-						y = sin(i) * this.ry+yInc;
-						vertex(x*cos(aInc) - y*sin(aInc), y*cos(aInc) + x*sin(aInc));
+						x = cos(i) * this.rx;
+						y = sin(i) * this.ry;
+						vertex(x*cos(aInc) - y*sin(aInc)+xInc, y*cos(aInc) + x*sin(aInc)+yInc);
 					}
-					x = cos(-this.stop) * this.rx+xInc;
-					y = sin(-this.stop) * this.ry+yInc;
-					vertex(x*cos(aInc) - y*sin(aInc), y*cos(aInc) + x*sin(aInc));
+					x = cos(-this.stop) * this.rx;
+					y = sin(-this.stop) * this.ry;
+					vertex(x*cos(aInc) - y*sin(aInc)+xInc, y*cos(aInc) + x*sin(aInc)+yInc);
 					if(this.closeSegment){
 						endShape(CLOSE);
 					}else{
