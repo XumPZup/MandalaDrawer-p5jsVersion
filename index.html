@@ -6,6 +6,7 @@
 body {padding: 0; margin: 0;}
 #objBtn, #menu, #select {border:2px solid #aaaaaa;}
 #objBtn {float: right; background-color:#B6FD86;}
+.arrows {border:2px outset buttonface; -webkit-appearance: button; width:20px; text-align:center; cursor:default;}
 #objects { overflow-y:scroll; height:50vh; width:13vw;}
 .on {background-color: #FFD199;}
 #delete, #copy{position: static;}
@@ -22,6 +23,8 @@ input {width: 70px;}
 <div id='objBtn'>
 	<button id='delete'>DELETE</button>
 	<button id='copy'>COPY</button>
+	<span class='arrows' id='arrowUp'>&#8679;</span>
+	<span class='arrows' id='arrowDown'>&#8681;</span>
 	<div id='objects'></div>
 </div>
 

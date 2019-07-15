@@ -3,7 +3,7 @@ var objList = document.getElementById('objects');
 
 var simmetryLines = document.getElementById('simmetryLines');
 var setReflectionAxis = document.getElementById('reflection');
-
+//buttons
 var selector = document.getElementById('choice');
 var btnAddShape = document.getElementById('add');
 btnAddShape.addEventListener('click', addShape);
@@ -11,6 +11,10 @@ var btnCopy = document.getElementById('copy');
 btnCopy.addEventListener('click', copy);
 var btnDelete = document.getElementById('delete');
 btnDelete.addEventListener('click', deleteObject);
+var upArrow = document.getElementById('arrowUp');
+upArrow.addEventListener('click', moveObject);
+var downArrow = document.getElementById('arrowDown');
+downArrow.addEventListener('click', moveObject);
 
 var bkgColorPicker = document.getElementById('bkgColor');
 bkgColorPicker.addEventListener('change', changeBkgColor);
@@ -43,6 +47,11 @@ function addShape(){
 		objects.push(new RegularPolygon());
 		p.innerHTML = 'Regular Polygon; ID=' + objects.length;
 	}
+	// - In Test - //
+	else if(selector.value == '3'){
+		objects.push(new TestClass());
+		p.innerHTML = 'Test class; ID=' + objects.length;
+	} //
 	selectedObject = objects.length-1;
 	objList.appendChild(p);
 	objects[selectedObject].putInputs();
@@ -93,6 +102,31 @@ function deleteObject(){
 		selectedObject = -1;
 	}
 }
+
+
+function moveObject(){
+	if(this.getAttribute('id') == 'arrowUp' && selectedObject > 0){
+		other = parseInt(selectedObject) - 1; 
+	}else if(this.getAttribute('id') == 'arrowDown' && selectedObject < objects.length-1){
+		other = parseInt(selectedObject) + 1;
+	}
+	if(other >= 0){
+		// Make a coy of the instances to swap
+		selectedCopy = Object.assign( Object.create( Object.getPrototypeOf(objects[selectedObject])), objects[selectedObject]);
+		otherCopy = Object.assign( Object.create( Object.getPrototypeOf(objects[other])), objects[other]);
+		// Swap instaces in objects list
+		objects[selectedObject] = otherCopy;
+		objects[other] = selectedCopy;
+		otherHtml = document.getElementById(other);
+		otherText = otherHtml.innerHTML.split(';')[0];
+		selectedHtml = document.getElementById(selectedObject)
+		selectedText = selectedHtml.innerHTML.split(';')[0];
+		otherHtml.innerHTML = selectedText + '; ID=' + (other+1);
+		selectedHtml.innerHTML = otherText + '; ID=' + (parseInt(selectedObject)+1);
+		otherHtml.click();
+	}
+}
+
 
 
 function hexToRgb(c){
