@@ -47,11 +47,14 @@ function addShape(){
 		objects.push(new RegularPolygon());
 		p.innerHTML = 'Regular Polygon; ID=' + objects.length;
 	}
-	// - In Test - //
 	else if(selector.value == '3'){
-		objects.push(new TestClass());
-		p.innerHTML = 'Test class; ID=' + objects.length;
-	} //
+		objects.push(new Petals());
+		p.innerHTML = 'Petals; ID=' + objects.length;
+	}
+	else if(selector.value == '4'){
+		objects.push(new ExperimentalShape1());
+		p.innerHTML = 'Experimental Shape1; ID=' + objects.length;
+	}
 	selectedObject = objects.length-1;
 	objList.appendChild(p);
 	objects[selectedObject].putInputs();
@@ -440,10 +443,297 @@ function RegularPolygon(){
 		menu.appendChild(subMenu);
 	}
 }
+
+//
+//
+//
+function Petals(){
+	this.distance = 100
+	this.rx = 50;
+	this.ry = 50;
+	this.repetitions = 1;
+	this.lineWidth = 1;
+	this.petalType = 0;
+	// Angles
+	this.rotation = 0
+	this.displace = 0
+	this.start = 0;
+	this.stop = 60;
+	this.reflectionAngle = 0;
+	// Checkboxes
+	this.closeSegment = true;
+	this.displayReflection = false;
+	this.connectReflectionToReal = false;
+	this.fill = false;
+	// Color
+	this.fillColor = mainColor;
+	this.strokeColor = mainColor;
+	// Functions
+	this.display = function(){
+		resetMatrix();
+		// Translation (0,0) == canvas center
+		translate(width/2, height/2);
+		rotate(this.displace);
+		strokeWeight(this.lineWidth);
+		for(var j = 0; j <= this.repetitions; j++){
+			var rep = 360/this.repetitions*j;
+			//_______________________
+			// Original figure
+			//_______________________
+			// Translation (0,0) = Figure center
+			translate(this.distance, 0);
+			rotate(this.rotation);
+			if(this.fill){
+				fill(this.fillColor);
+			}else{
+				noFill();
+			}
+			stroke(this.strokeColor);
+			beginShape();
+			for(var i = this.stop; i > this.start; i-=1){
+				if(this.petalType == 0 || this.petalType == 1){
+					x = cos(2*i)*sin(3*i) * this.rx;
+					if(this.petalType == 0){
+						y = sin(3*i) * this.ry;
+					}else{
+						y = sin(i)*sin(i)*sin(4*i) * this.ry;	
+					}
+				}
+				else if(this.petalType == 2){
+					x = sin(i)*cos(2*i)*tan(i/2) * this.rx;
+					y = sin(i)*sin(i*2)*sin(i*3) * this.ry;
+				}else{
+					x = cos(2*i) * this.rx;
+					y = sin(3*i) * this.ry;
+				}
+				vertex(x, y);
+			}
+			if(this.closeSegment && !this.connectReflectionToReal){
+				endShape(CLOSE);
+			}else if(!this.reflection){
+				endShape();
+			}
+			//_______________________
+			// Toggle reflection
+			//_______________________
+			if(this.displayReflection){
+				var alpha = 90 - this.reflectionAngle;
+				var realToReflectionDistance = (this.distance * cos(alpha)) *2;
+				// angle of reflection
+				aInc = (2*this.reflectionAngle-(2*this.rotation));
+				// reflection center
+				xInc = realToReflectionDistance*cos(180-alpha-this.rotation);
+				yInc = realToReflectionDistance*sin(180-alpha-this.rotation);
+				if(!this.connectReflectionToReal){
+					beginShape();
+				}
+				for(var i = -this.start; i > -this.stop; i-=1){
+					if(this.petalType == 0 || this.petalType == 1){
+						x = cos(2*i)*sin(3*i) * this.rx;
+						if(this.petalType == 0){
+							y = sin(3*i) * this.ry;
+						}else{
+							y = sin(i)*sin(i)*sin(4*i) * this.ry;	
+						}
+					}
+					else if(this.petalType == 2){
+						x = sin(i)*cos(2*i)*tan(i/2) * this.rx;
+						y = sin(i)*sin(i*2)*sin(i*3) * this.ry;
+					}else{
+						x = cos(2*i) * this.rx;
+						y = sin(3*i) * this.ry;
+					}
+					vertex(x*cos(aInc) - y*sin(aInc)+xInc, y*cos(aInc) + x*sin(aInc)+yInc);
+				}
+				if(this.closeSegment){
+				endShape(CLOSE);
+				}else{
+					endShape();
+				}
+			}				
+			// RESET
+			resetMatrix();
+			// Translation (0,0) = canvas center
+			translate(width/2, height/2);
+			rotate(this.displace+rep);	
+		}
+	}
+	
+	
+	this.putInputs = function(){
+		var subMenu = document.getElementById('subMenu');
+		if(subMenu){
+			subMenu.remove();
+		}
+		var keys = Object.keys(this);
+		subMenu = document.createElement('div');
+		subMenu.setAttribute('id', 'subMenu')
+		for(var i = 0; i < keys.length-2; i++){
+			var label = document.createElement('label');
+			label.innerHTML = keys[i] + ': ';
+			var input = document.createElement('input');
+			if(i < 11){
+				input.type = 'number';
+				input.value = this[keys[i]];
+			}
+			else if(i > 10 && i < keys.length-4){
+				input.type = 'checkbox';
+				input.checked = this[keys[i]];
+			}
+			else{
+				input.type = 'color';
+				input.value = rgbToHex(this[keys[i]][0], this[keys[i]][1], this[keys[i]][2]);
+			}
+			input.setAttribute('id',keys[i]);
+			
+			subMenu.appendChild(label);
+			subMenu.appendChild(input);
+			subMenu.appendChild(document.createElement('br'));
+			input.addEventListener('change', setChanges);
+		}
+		infos = document.createElement('p');
+		infos.innerHTML = 'Petal type = 0 &#8594; Start=0; stop=60</br>Petal type = 1 &#8594; Start=0; stop=45</br>Petal type = 2and3 &#8594; Start=120; stop=240';
+		subMenu.appendChild(infos);
+		menu.appendChild(subMenu);
+	}
+}
+
 //
 //
 //
 //
+function ExperimentalShape1(){
+	this.distance = 100
+	this.rx = 50;
+	this.ry = 50;
+	this.curveType = 1;
+	this.sqeeze = 1;
+	this.repetitions = 1;
+	this.lineWidth = 1;
+	// Angles
+	this.rotation = 0
+	this.displace = 0
+	this.start = 0;
+	this.stop = 360;
+	this.angleStep = 4
+	this.reflectionAngle = 0;
+	// Checkboxes
+	this.closeSegment = true;
+	this.displayReflection = false;
+	this.connectReflectionToReal = false;
+	this.fill = false;
+	// Color
+	this.fillColor = mainColor;
+	this.strokeColor = mainColor;
+	// Functions
+	this.display = function(){
+		if(this.squeeze == 0 || this.angleStep < 1){
+			return;
+		}
+		resetMatrix();
+		// Translation (0,0) == canvas center
+		translate(width/2, height/2);
+		rotate(this.displace);
+		strokeWeight(this.lineWidth);
+		for(var j = 0; j <= this.repetitions; j++){
+			var rep = 360/this.repetitions*j;
+			//_______________________
+			// Original figure
+			//_______________________
+			// Translation (0,0) = Figure center
+			translate(this.distance, 0);
+			rotate(this.rotation);
+			if(this.fill){
+				fill(this.fillColor);
+			}else{
+				noFill();
+			}
+			stroke(this.strokeColor);
+			beginShape();
+			for(var i = this.stop; i > this.start; i-=this.angleStep){
+				x = cos(i) * this.rx;
+				y = ((sin(i) * cos(i*this.curveType)) * this.ry) / this.sqeeze;
+				vertex(x, y);
+			}
+			if(this.closeSegment && !this.connectReflectionToReal){
+				endShape(CLOSE);
+			}else if(!this.reflection){
+				endShape();
+			}
+			//_______________________
+			// Toggle reflection
+			//_______________________
+			if(this.displayReflection){
+				var alpha = 90 - this.reflectionAngle;
+				var realToReflectionDistance = (this.distance * cos(alpha)) *2;
+				// angle of reflection
+				aInc = (2*this.reflectionAngle-(2*this.rotation));
+				// reflection center
+				xInc = realToReflectionDistance*cos(180-alpha-this.rotation);
+				yInc = realToReflectionDistance*sin(180-alpha-this.rotation);
+				if(!this.connectReflectionToReal){
+					beginShape();
+				}
+				for(var i = -this.start; i > -this.stop; i-=this.angleStep){
+					x = cos(i) * this.rx;
+					y = ((sin(i) * cos(i*this.curveType)) * this.ry) / this.sqeeze;
+					vertex(x*cos(aInc) - y*sin(aInc)+xInc, y*cos(aInc) + x*sin(aInc)+yInc);
+				}
+				if(this.closeSegment){
+				endShape(CLOSE);
+				}else{
+					endShape();
+				}
+			}				
+			// RESET
+			resetMatrix();
+			// Translation (0,0) = canvas center
+			translate(width/2, height/2);
+			rotate(this.displace+rep);	
+		}
+	}
+	
+	
+	this.putInputs = function(){
+		var subMenu = document.getElementById('subMenu');
+		if(subMenu){
+			subMenu.remove();
+		}
+		var keys = Object.keys(this);
+		subMenu = document.createElement('div');
+		subMenu.setAttribute('id', 'subMenu')
+		for(var i = 0; i < keys.length-2; i++){
+			var label = document.createElement('label');
+			label.innerHTML = keys[i] + ': ';
+			var input = document.createElement('input');
+			if(i < 13){
+				input.type = 'number';
+				input.value = this[keys[i]];
+			}
+			else if(i > 12 && i < keys.length-4){
+				input.type = 'checkbox';
+				input.checked = this[keys[i]];
+			}
+			else{
+				input.type = 'color';
+				input.value = rgbToHex(this[keys[i]][0], this[keys[i]][1], this[keys[i]][2]);
+			}
+			input.setAttribute('id',keys[i]);
+			
+			subMenu.appendChild(label);
+			subMenu.appendChild(input);
+			subMenu.appendChild(document.createElement('br'));
+			input.addEventListener('change', setChanges);
+		}
+		menu.appendChild(subMenu);
+	}
+}
+
+//
+//
+//
+//
+
 function setChanges(){
 	var key = this.getAttribute('id');
 	if(this.type == 'number'){
@@ -486,5 +776,3 @@ function draw(){
 		}
 	}
 }
-
-
