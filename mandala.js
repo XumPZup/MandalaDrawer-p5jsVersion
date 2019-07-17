@@ -3,8 +3,12 @@ var objList = document.getElementById('objects');
 
 var simmetryLines = document.getElementById('simmetryLines');
 var setReflectionAxis = document.getElementById('reflection');
-//buttons
+
+var imageUrl = document.getElementById('bkgImg');
 var selector = document.getElementById('choice');
+//buttons
+var btnLoadBkgImage = document.getElementById('loadImage');
+btnLoadBkgImage.addEventListener('click', loadBkgImage);
 var btnAddShape = document.getElementById('add');
 btnAddShape.addEventListener('click', addShape);
 var btnCopy = document.getElementById('copy');
@@ -28,6 +32,12 @@ var bkg = [255,255,255];
 var mainColor = [0,0,0];
 var objects = []
 var selectedObject;
+
+
+function loadBkgImage(){
+	img = loadImage(imageUrl.value);
+	bkg = img
+}
 
 
 function addShape(){
